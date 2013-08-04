@@ -1,0 +1,45 @@
+
+==========================================================================
+  WARNING  WARNING  WARNING  WARNING  WARNING  WARNING  WARNING  WARNING
+==========================================================================
+
+ This is experimental, potentially dangerous code that writes to your
+ BIOS and can make your system unbootable. It's known to work in my test
+ machines running AMI BIOS 4.6.4, but your milleage may vary. If you're
+ unsure, don't run this code and use AMI-provided tools such as DMIDOS
+ or AMIDEWIN.
+
+==========================================================================
+  WARNING  WARNING  WARNING  WARNING  WARNING  WARNING  WARNING  WARNING
+==========================================================================
+
+
+
+                        AMIBIOS DMI update driver
+                        -------------------------
+
+
+This is a module that exposes a few AMI BIOS SMBIOS DMI structure fields
+and allows them to be updated using AMI-specific SMI calls. It's useful
+to e.g. update chassis (type 3) asset tags.
+
+DMI fields are presented in /sys/firmware/amibios. You can read current
+values and update them by reading and writing to the appropriate files.
+Errors are reported in kernel messages.
+
+Requirements:
+
+- AMI BIOS 4.6.4 (other versions may be compatible)
+- Linux 3.0 or higher
+
+
+To read the current chassis asset tag:
+
+ # cat /sys/firmware/amibios/chassis/asset_tag
+
+
+To update the chassis asset tag:
+
+ # echo "ASSET TAG TEST" > /sys/firmware/amibios/chassis/asset_tag
+
+
