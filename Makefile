@@ -5,9 +5,8 @@ endif
 obj-m += amibios_dmi.o
 amibios_dmi-objs := amibios_smi.o amibios_sysfs.o
 
-all:
-	make -C $(KERNEL) SUBDIRS=$(PWD) modules
+all: modules
 
-clean:
-	make -C $(KERNEL) SUBDIRS=$(PWD) clean
+modules clean:
+	make -C $(KERNEL) SUBDIRS=$(PWD) $@
 
