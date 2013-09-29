@@ -53,10 +53,9 @@ static ssize_t show_dmi_string(struct dmi_type *dt, int offset, char *buf)
 {
 	char s[FIELD_SIZE];
 
-	if (amibios_dmi_get_string(&dt->info, offset, s, FIELD_SIZE) < 0)
-	{
-		printk(KERN_ERR "amibios_dmi: error reading string (handle"
-			" 0x%04x offset 0x%02x)\n", dt->info.handle, offset);
+	if (amibios_dmi_get_string(&dt->info, offset, s, FIELD_SIZE) < 0) {
+		pr_err("amibios_dmi: error reading string (handle 0x%04x "
+				"offset 0x%02x)\n", dt->info.handle, offset);
 		return sprintf(buf, "%s\n", "<error>");
 	}
 
@@ -81,12 +80,12 @@ static ssize_t store_dmi_string(struct dmi_type *dt, int offset,
 			s[i] = ' ';
 	}
 
-	printk(KERN_INFO "amibios_dmi: set handle 0x%04x offset 0x%02x: "
+	pr_info("amibios_dmi: set handle 0x%04x offset 0x%02x: "
 				"\"%s\"\n", dt->info.handle, offset, s);
 			
 	if (amibios_smi_write_string(dt->info.handle, offset, s) < 0) {
-		printk(KERN_ERR "amibios_dmi: error setting string (handle"
-			" 0x%04x offset 0x%02x)\n", dt->info.handle, offset);
+		pr_err("amibios_dmi: error setting string (handle 0x%04x "
+				"offset 0x%02x)\n", dt->info.handle, offset);
 	}
 
 	return count;
@@ -97,8 +96,8 @@ static ssize_t show_dmi_byte(struct dmi_type *dt, int offset, char *buf)
 	u8 c;
 
 	if (amibios_dmi_get_byte(&dt->info, offset, &c) < 0) {
-		printk(KERN_ERR "amibios_dmi: error reading byte (handle"
-			" 0x%04x offset 0x%02x)\n", dt->info.handle, offset);
+		pr_err("amibios_dmi: error reading byte (handle 0x%04x "
+				"offset 0x%02x)\n", dt->info.handle, offset);
 		return sprintf(buf, "%s\n", "<error>");
 	}
 
@@ -113,13 +112,13 @@ static ssize_t store_dmi_byte(struct dmi_type *dt, int offset,
 
 	ret = kstrtol(buf, 0, &val);
 
-	printk(KERN_INFO "amibios_dmi: set handle 0x%04x offset 0x%02x: "
-			"0x%02x\n", dt->info.handle, offset, (int)val);
+	pr_info("amibios_dmi: set handle 0x%04x offset 0x%02x: "
+				"0x%02x\n", dt->info.handle, offset, (int)val);
 			
 	if (ret < 0 || val < 0 || val > 0xff || amibios_smi_write_byte(
 					dt->info.handle, offset, val) < 0) {
-		printk(KERN_ERR "amibios_dmi: error setting byte (handle"
-			" 0x%04x offset 0x%02x)\n", dt->info.handle, offset);
+		pr_err("amibios_dmi: error setting byte (handle 0x%04x "
+				"offset 0x%02x)\n", dt->info.handle, offset);
 	}
 
 	return count;

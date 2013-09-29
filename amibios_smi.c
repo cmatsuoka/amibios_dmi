@@ -193,7 +193,7 @@ static void smi_error_message(int code)
 		break;
 	}
 
-	printk(KERN_ERR "amibios_dmi: SMI error %02x: %s.\n", code, msg);
+	pr_err("amibios_dmi: SMI error %02x: %s.\n", code, msg);
 }
 
 static int smi_command(int port, int cmd, u32 ptr)
@@ -254,8 +254,7 @@ static int smi_info(void)
 	ret = smi_command(SMI_PORT, SMI_CMD_INFO, (u32)amibios_data_ptr);
 	if (ret) {
 		if (ret == SMI_CMD_INFO) {
-			printk(KERN_ERR "amibios_dmi: Compatible AMI BIOS "
-					"not found\n");
+			pr_err("amibios_dmi: Compatible AMI BIOS not found\n");
 		} else {
 			smi_error_message(ret);
 		}
@@ -277,8 +276,8 @@ static int smi_read(int handle)
 		return -1;
 
 	if (amibios_st_size > PAGE_SIZE) {
-		printk(KERN_ERR "amibios_dmi: structure too large "
-				"(%d bytes)\n", amibios_st_size);
+		pr_err("amibios_dmi: structure too large (%d bytes)\n",
+							amibios_st_size);
 		return -1;
 	}
 
@@ -298,15 +297,14 @@ static int smi_read(int handle)
 
 	/* Sanity check */
 	if (amibios_data->read.data.dmi_structure.handle != handle) {
-		printk(KERN_ERR "amibios_dmi: SMI read error "
-				"(handle 0x%04x)\n", handle);
+		pr_err("amibios_dmi: SMI read error (handle 0x%04x)\n", handle);
 		return -1;
 	}
 
 	len = dmi_structure_length(&amibios_data->read.data);
 	if (len < 0) {
-		printk(KERN_ERR "amibios_dmi: DMI structure too long "
-				"(handle 0x%04x)\n", handle);
+		pr_err("amibios_dmi: DMI structure too long (handle 0x%04x)\n",
+								handle);
 		return -1;
 	}
 
@@ -316,7 +314,7 @@ static int smi_read(int handle)
 static int check_buffer_size(int n)
 {
 	if (amibios_size > SMI_BUFFER_SIZE + n) {
-		printk(KERN_ERR "amibios_dmi: out of work buffer space\n");
+		pr_err("amibios_dmi: out of work buffer space\n");
 		return -1;
 	}
 
@@ -468,12 +466,12 @@ int __init amibios_smi_init(int *version)
 	/* Being extra cautious */
 	if (amibios_data->info.version < 0x24 ||
 	    amibios_data->info.version > 0x28) {
-		printk(KERN_ERR "amibios_dmi: unsupported SMBIOS version\n");
+		pr_err("amibios_dmi: unsupported SMBIOS version\n");
 		goto err2;
 	}
 
 	if (amibios_data->info.st_num == 0) {
-		printk(KERN_ERR "amibios_dmi: no DMI structures\n");
+		pr_err("amibios_dmi: no DMI structures\n");
 		goto err2;
 	}
 
@@ -484,7 +482,7 @@ int __init amibios_smi_init(int *version)
 
 	*version = amibios_data->info.version;
 
-	printk(KERN_INFO "amibios_dmi: SMBIOS %d.%d found (%d structures).\n",
+	pr_info("amibios_dmi: SMBIOS %d.%d found (%d structures).\n",
 					amibios_data->info.version >> 4,
 					amibios_data->info.version & 0x0f,
 					amibios_data->info.st_num);
@@ -527,8 +525,8 @@ static int dmi_read(struct amibios_dmi_structure_info *ds)
 	ds->size = len;
 
 	if (ds->size < 0) {
-		printk(KERN_ERR "ambios: DMI structure length error "
-					"(handle 0x%04x)\n", ds->handle);
+		pr_err("ambios: DMI structure length error (handle 0x%04x)\n",
+								ds->handle);
 		return -1;
 	}
 
@@ -562,14 +560,13 @@ int amibios_dmi_get_handle(int type)
 	if (ds->type >= 127)
 		goto err;
 
-	printk(KERN_ERR "amibios_dmi: handle for type %d: 0x%04x\n",
-							type, ds->handle);
+	pr_err("amibios_dmi: handle for type %d: 0x%04x\n", type, ds->handle);
 
 	mutex_unlock(&amibios_mutex);
 	return ds->handle;
 
     err:
-	printk(KERN_ERR "amibios_dmi: can't find handle for type %d\n", type);
+	pr_err("amibios_dmi: can't find handle for type %d\n", type);
 	mutex_unlock(&amibios_mutex);
 	return -1;
 }
@@ -594,8 +591,8 @@ int amibios_dmi_get_byte(struct amibios_dmi_structure_info *ds,
 		goto err;
 
 	if (offset > ds->header_size) {
-		printk(KERN_ERR "amibios_dmi: invalid DMI data request (handle "
-				"0x%04x offset 0x%02x)\n", ds->handle, offset);
+		pr_err("amibios_dmi: invalid DMI data request (handle 0x%04x "
+				"offset 0x%02x)\n", ds->handle, offset);
 		goto err;
 	}
 
@@ -634,15 +631,15 @@ int amibios_dmi_get_string(struct amibios_dmi_structure_info *ds,
 		goto err;
 
 	if (offset > ds->header_size) {
-		printk(KERN_ERR "amibios_dmi: invalid DMI data request (handle "
-				"0x%04x offset 0x%02x)\n", ds->handle, offset);
+		pr_err("amibios_dmi: invalid DMI data request (handle 0x%04x "
+				"offset 0x%02x)\n", ds->handle, offset);
 		goto err;
 	}
 
 	index = data[offset] - 1;
 	if (index < 0) {
-		printk(KERN_ERR "amibios_dmi: invalid string number (handle "
-				"0x%04x offset 0x%02x)\n", ds->handle, offset);
+		pr_err("amibios_dmi: invalid string number (handle 0x%04x "
+				"offset 0x%02x)\n", ds->handle, offset);
 		goto err;
 	}
 
